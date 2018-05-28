@@ -25,12 +25,25 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
 
 	int nHeight = pindexLast->nHeight + 1;
-	if (nHeight < 26754) {
-	    return GetNextWorkRequired_Bitcoin(pindexLast, pblock, params);
-	}
-	else if (nHeight == 208301) {
-   	    return 0x1e0ffff0;
-	}
+
+    if(params.testnet) {
+        if(nHeight < 2116) {
+            return GetNextWorkRequired_Bitcoin(pindexLast, pblock, params);
+        }
+
+        if(nHeight % 12 != 0) {
+            CBigNum bnNew;
+	        bnNew.SetCompact(pindexLast->nBits);
+	        if (bnNew > bnProofOfWorkLimit) { bnNew = bnProofOfWorkLimit; }
+            return bnNew.GetCompact();
+        }
+    } else {
+        if(nHeight < 26754) {
+            return GetNextWorkRequired_Bitcoin(pindexLast, pblock, params);
+        } else if(nHeight == 208301) {
+            return 0x1e0ffff0;
+        }
+    }
     return KimotoGravityWell(pindexLast, pblock, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax, params);    
 }
 
